@@ -1,5 +1,5 @@
 spring:
   application.name: experimentspb-mongo
-  profiles.active: own
+  profiles.active: devTest
 server:
   port: 9091
