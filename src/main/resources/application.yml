@@ -1,5 +1,5 @@
 spring:
-  application.name: demo
+  application.name: experimentspb-mongo
   profiles.active: own
 server:
-  port: 8080
+  port: 9091

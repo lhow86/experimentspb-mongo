@@ -8,6 +8,7 @@ buildscript {
 
 	configurations {
 		compile.exclude module: "spring-boot-starter-tomcat"
+		compile.exclude module: "commons-logging"
 	}
 	
 	ext {
@@ -42,6 +43,65 @@ dependencies {
 	compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
 	compile("org.springframework.boot:spring-boot-starter-cache:$springBootVersion")
 	compile ("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+	//gradle 5.6 不加这个 log找不到符号
+	annotationProcessor("org.projectlombok:lombok:1.18.8")
+	
+	//日志
+	compile(
+			"net.logstash.logback:logstash-logback-encoder:4.11",
+			"org.projectlombok:lombok:1.18.8"
+	)
+	
 	//加载本地依赖
 	compile fileTree(dir: 'lib', include: ['*.jar'])
+}
+
+def jarName = rootProject.name + ".jar"
+
+build.mustRunAfter clean
+task buildJar(dependsOn: [build,clean]) {
+	doLast {
+		copy() {
+			from("build/libs/" + jarName)
+			into "build"
+			from("dist")
+			into "build"
+		}
+		file("build/classes").deleteDir()
+		file("build/generated").deleteDir()
+		file("build/libs").deleteDir()
+		file("build/reports").deleteDir()
+		file("build/resources").deleteDir()
+		file("build/test-results").deleteDir()
+		file("build/tmp").deleteDir()
+
+		def fileDev = file("build/dev")
+		def fileTest = file("build/test")
+		def fileProd = file("build/prod")
+		def fileJar = file("build/" + jarName)
+		fileDev.delete()
+		fileDev.mkdirs()
+		fileTest.delete()
+		fileTest.mkdirs()
+		fileProd.delete()
+		fileProd.mkdirs()
+		["build/dev", "build/test", "build/prod"].each { dest ->
+			copy {
+				from "build/" + fileJar.getName()
+				into dest
+				from("dist/springBoot.sh")
+				into dest
+				from("dist/application_".concat(dest.replace('build/','')).concat(".yml"))
+				into dest
+				rename { String fileName ->
+					fileName.replace('_'.concat(dest.replace('build/','')), '')
+				}
+			}
+		}
+		fileJar.delete()
+		file("build/application_dev.yml").delete()
+		file("build/application_test.yml").delete()
+		file("build/application_prod.yml").delete()
+		file("build/springBoot.sh").delete()
+	}
 }
