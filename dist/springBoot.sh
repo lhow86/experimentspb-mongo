@@ -5,8 +5,8 @@ JAVA_OPTIONS_INITIAL=-Xms512M
 JAVA_OPTIONS_MAX=-Xmx512M
 JAVA_OPTIONS_PERMSIZE=-XX:PermSize=256m
 JAVA_OPTIONS_MAX_PERMSIZE=-XX:MaxPermSize=256m
-_JAR_KEYWORDS=experimentspb.jar
-APP_NAME=experimentspb
+_JAR_KEYWORDS=experimentspb-mongo.jar
+APP_NAME=experimentspb-mongo
 PID=$(ps aux | grep ${_JAR_KEYWORDS} | grep -v grep | awk '{print $2}' )
 
 check_if_process_is_running(){
