@@ -8,12 +8,17 @@ import com.example.sys.util.JsonUtils;
 import com.example.sys.util.ReflectUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapreduce.GroupBy;
+import org.springframework.data.mongodb.core.mapreduce.GroupByResults;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class BaseService {
 
@@ -68,7 +73,7 @@ public abstract class BaseService {
         }
         JSONObject dataMap = new JSONObject();
         try {
-            JSONArray insertList = null != queryMap.get("insert") ?  queryMap.getJSONArray("insert") : new JSONArray();
+            JSONArray insertList = null != queryMap.get("insert") ? queryMap.getJSONArray("insert") : new JSONArray();
             insertList.stream().forEach(insertObj -> {
 //                createBasicHandler((JSONObject) insertObj, entityClass);
             });
@@ -84,8 +89,8 @@ public abstract class BaseService {
                     Query query = QueryFactory.createCriteriaQuery(deleteMap);
                     mongoTemplate.remove(query, entityClass);
                 } else if (delete instanceof JSONObject) {
-                    ((JSONObject)delete).keySet().stream().forEach(key -> {
-                        JSONArray deleteList = ((JSONObject)delete).getJSONArray(key);
+                    ((JSONObject) delete).keySet().stream().forEach(key -> {
+                        JSONArray deleteList = ((JSONObject) delete).getJSONArray(key);
                         JSONObject deleteMap = new JSONObject();
                         deleteMap.put("in_" + key, deleteList);
                         Query query = QueryFactory.createCriteriaQuery(deleteMap);
@@ -106,7 +111,7 @@ public abstract class BaseService {
      */
     public JSONObject queryBasicPage(JSONObject requestMap, Class entityClass) throws Exception {
         JSONObject result = new JSONObject();
-        try{
+        try {
             int offset = requestMap.get("offset") != null ? (int) requestMap.remove("offset") : 1;
             int limit = requestMap.get("limit") != null ? (int) requestMap.remove("limit") : 10;
             Query query = QueryFactory.createCriteriaQuery(requestMap);
@@ -118,11 +123,58 @@ public abstract class BaseService {
             long total = mongoTemplate.count(query, entityClass);
             result.put("total", total);
             result.put("rows", entityList);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new Exception(e);
         }
         return result;
+    }
+
+    /**
+     * 通用列表查询操作
+     */
+    public JSONObject queryBasicList(JSONObject queryMap, Class entityClass) throws Exception {
+        JSONObject result = new JSONObject();
+        try {
+            List<Object> entityList;
+            if (null == queryMap.get("groupBy")) {
+                Query query = QueryFactory.createCriteriaQuery(queryMap);
+                entityList = mongoTemplate.find(query, entityClass);
+            } else {
+                Map<String, Criteria> criteriaMap = QueryFactory.createCriteriaMap(queryMap);
+                Criteria[] criteriaArray = QueryFactory.createCriteriaArray(criteriaMap);
+                String[] groupKeys = queryMap.getString("groupBy").split(",");
+                String collectionName = ((org.springframework.data.mongodb.core.mapping.Document) entityClass.getAnnotation(org.springframework.data.mongodb.core.mapping.Document.class)).collection();
+                GroupByResults<Document> groupByResults = mongoTemplate.group(
+                        criteriaArray.length > 0 ? new Criteria().andOperator(criteriaArray) : null,
+                        collectionName,
+                        GroupBy.key(groupKeys).initialDocument("{ count: 0 }").reduceFunction("function(doc, prev) { prev.count += 1 }"),
+                        Document.class);
+                entityList = (List) groupByResults.getRawResults().get("retval");
+            }
+            result.put("total", entityList.size());
+            result.put("rows", entityList);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new Exception(e);
+        }
+        return result;
+    }
+
+    /**
+     * 通过单条查询操作
+     */
+    public JSONObject getBasic(JSONObject queryMap, Class entityClass) throws Exception {
+        JSONObject result = new JSONObject();
+        try {
+            if (queryMap.keySet().size() == 0) {
+
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new Exception(e);
+        }
+        return null;
     }
 
 }
