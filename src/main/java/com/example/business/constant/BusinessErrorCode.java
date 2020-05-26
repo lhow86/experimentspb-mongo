@@ -14,6 +14,7 @@ public enum BusinessErrorCode implements ErrorCodeI {
         this.errorInfo = errorInfo;
     }
 
+    @Override
     public String getErrorCode() {
         return errorCode;
     }
@@ -22,6 +23,7 @@ public enum BusinessErrorCode implements ErrorCodeI {
         this.errorCode = errorCode;
     }
 
+    @Override
     public String getErrorInfo() {
         return errorInfo;
     }

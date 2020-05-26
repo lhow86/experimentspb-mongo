@@ -3,7 +3,10 @@ package com.example.sys.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.business.constant.BusinessConstants;
+import com.example.business.constant.BusinessErrorCode;
 import com.example.sys.db.QueryFactory;
+import com.example.sys.exception.EpMongoModuleException;
 import com.example.sys.util.JsonUtils;
 import com.example.sys.util.ReflectUtils;
 import org.apache.commons.logging.Log;
@@ -30,7 +33,7 @@ public abstract class BaseService {
     /**
      * 新增
      */
-    public Object createBasicHandler(JSONObject dataMap, Class entityClass) throws Exception {
+    public Object createBasicHandler(JSONObject dataMap, Class entityClass) throws EpMongoModuleException {
         Object entity = JsonUtils.beanToBean(dataMap, entityClass);
         mongoTemplate.insert(entity);
         return entity;
@@ -39,7 +42,7 @@ public abstract class BaseService {
     /**
      * Update
      */
-    public Object updateBasicHandler(JSONObject dataMap, Class entityClass) throws Exception {
+    public Object updateBasicHandler(JSONObject dataMap, Class entityClass) throws EpMongoModuleException {
         Object entity;
         if ("class org.bson.types.ObjectId".equals(ReflectUtils.getFieldTypeByFieldName(entityClass, "_id"))) {
             String id = (String) dataMap.remove("_id");
@@ -55,7 +58,7 @@ public abstract class BaseService {
     /**
      * Delete
      */
-    public Object deleteBasicHandler(JSONArray idList, Class entityClass) throws Exception {
+    public Object deleteBasicHandler(JSONArray idList, Class entityClass) throws EpMongoModuleException {
         JSONObject queryMap = new JSONObject();
         queryMap.put("in_id", idList);
         Query query = QueryFactory.createCriteriaQuery(queryMap);
@@ -65,9 +68,9 @@ public abstract class BaseService {
     }
 
     /**
-     * 通用增删改操作 todo
+     * 通用增删改操作
      */
-    public JSONObject cudBasicHandler(JSONObject queryMap, Class entityClass) throws Exception{
+    public JSONObject cudBasicHandler(JSONObject queryMap, Class entityClass) throws EpMongoModuleException {
         if (null == queryMap) {
             queryMap = new JSONObject();
         }
@@ -75,11 +78,11 @@ public abstract class BaseService {
         try {
             JSONArray insertList = null != queryMap.get("insert") ? queryMap.getJSONArray("insert") : new JSONArray();
             insertList.stream().forEach(insertObj -> {
-//                createBasicHandler((JSONObject) insertObj, entityClass);
+                createBasicHandler((JSONObject) insertObj, entityClass);
             });
             JSONArray updateList = null != queryMap.get("update") ? queryMap.getJSONArray("update") : new JSONArray();
             updateList.stream().forEach(updateObj -> {
-//                updateBasicHandler((JSONObject) updateObj, entityClass);
+                updateBasicHandler((JSONObject) updateObj, entityClass);
             });
             JSON delete = (JSON) queryMap.get("delete");
             if (null != delete) {
@@ -102,14 +105,14 @@ public abstract class BaseService {
             return dataMap;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new Exception(e);
+            throw new EpMongoModuleException(BusinessConstants.ERROR_CODE001, e.getMessage());
         }
     }
 
     /**
      * 通用单页查询操作
      */
-    public JSONObject queryBasicPage(JSONObject requestMap, Class entityClass) throws Exception {
+    public JSONObject queryBasicPage(JSONObject requestMap, Class entityClass) throws EpMongoModuleException {
         JSONObject result = new JSONObject();
         try {
             int offset = requestMap.get("offset") != null ? (int) requestMap.remove("offset") : 1;
@@ -125,7 +128,7 @@ public abstract class BaseService {
             result.put("rows", entityList);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new Exception(e);
+            throw new EpMongoModuleException(BusinessConstants.ERROR_CODE001, e.getMessage());
         }
         return result;
     }
@@ -133,7 +136,7 @@ public abstract class BaseService {
     /**
      * 通用列表查询操作
      */
-    public JSONObject queryBasicList(JSONObject queryMap, Class entityClass) throws Exception {
+    public JSONObject queryBasicList(JSONObject queryMap, Class entityClass) throws EpMongoModuleException {
         JSONObject result = new JSONObject();
         try {
             List<Object> entityList;
@@ -156,7 +159,7 @@ public abstract class BaseService {
             result.put("rows", entityList);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new Exception(e);
+            throw new EpMongoModuleException(BusinessConstants.ERROR_CODE001, e.getMessage());
         }
         return result;
     }
@@ -164,7 +167,7 @@ public abstract class BaseService {
     /**
      * 通过单条查询操作
      */
-    public JSONObject getBasic(JSONObject queryMap, Class entityClass) throws Exception {
+    public JSONObject getBasic(JSONObject queryMap, Class entityClass) throws EpMongoModuleException {
         JSONObject result = new JSONObject();
         try {
             if (queryMap.keySet().size() == 0) {
@@ -172,7 +175,7 @@ public abstract class BaseService {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new Exception(e);
+            throw new EpMongoModuleException(BusinessConstants.ERROR_CODE001, e.getMessage());
         }
         return null;
     }
