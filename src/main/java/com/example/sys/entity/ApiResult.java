@@ -1,4 +1,4 @@
-package com.example.sys.model;
+package com.example.sys.entity;
 
 import com.example.sys.constant.SysConstants;
 import com.example.sys.dto.ErrorCodeI;

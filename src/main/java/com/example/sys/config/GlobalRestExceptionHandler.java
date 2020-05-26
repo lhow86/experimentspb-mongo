@@ -2,8 +2,8 @@ package com.example.sys.config;
 
 import com.example.sys.constant.SysConstants;
 import com.example.sys.constant.SysErrorCode;
+import com.example.sys.entity.ApiResult;
 import com.example.sys.exception.BaseException;
-import com.example.sys.model.ApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
