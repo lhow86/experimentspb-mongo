@@ -2,6 +2,5 @@ spring:
   application.name: experimentspb-mongo
   profiles.active: devTest
   data.mongodb.uri: mongodb://swgd:easipass@106.14.83.136:27017/swgd
-#  data.mongodb.uri: mongodb://swgd:easipass@106.14.83.136:27017/swgd?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false
 server:
   port: 9091
