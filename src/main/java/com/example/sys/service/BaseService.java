@@ -65,9 +65,9 @@ public abstract class BaseService {
     }
 
     /**
-     * 通用增删改操作
+     * 通用增删改操作 todo
      */
-    public JSONObject cudBasicHandler(JSONObject queryMap, Class entityClass) throws Exception {
+    public JSONObject cudBasicHandler(JSONObject queryMap, Class entityClass) throws Exception{
         if (null == queryMap) {
             queryMap = new JSONObject();
         }

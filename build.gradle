@@ -24,7 +24,7 @@ buildscript {
 apply plugin: 'org.sonarqube'
 
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+//version = '0.0.1-SNAPSHOT'
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'idea'
@@ -50,7 +50,11 @@ dependencies {
 			"net.logstash.logback:logstash-logback-encoder:4.11",
 			"org.projectlombok:lombok:1.18.8"
 	)
-
+	//swagger2
+	compile(
+			"io.springfox:springfox-swagger2:2.6.1",
+			"io.springfox:springfox-swagger-ui:2.6.1"
+	)
 	//数据库相关
 	compile ("org.springframework.boot:spring-boot-starter-data-mongodb:$springBootVersion")
 
